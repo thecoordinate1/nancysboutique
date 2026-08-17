@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Product } from '@/data/products';
+import { useToast } from '@/context/ToastContext';
 
 export interface CartItem {
   product: Product;
