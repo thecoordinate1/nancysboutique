@@ -2,12 +2,10 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ShoppingBag, Menu, ChevronDown, Sun, Moon } from 'lucide-react';
+import { Search, ShoppingBag, Menu, Sun, Moon } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useTheme } from '@/context/ThemeContext';
 import Link from 'next/link';
-
-const currencies = ['USD', 'EUR', 'GBP'];
 
 interface HeaderProps {
   onMenuOpen: () => void;
@@ -17,8 +15,6 @@ interface HeaderProps {
 export default function Header({ onMenuOpen, onSearchOpen }: HeaderProps) {
   const { itemCount, openCart } = useCart();
   const { theme, toggleTheme } = useTheme();
-  const [currency, setCurrency] = useState('USD');
-  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 glass border-b border-champagne/40">
@@ -69,40 +65,8 @@ export default function Header({ onMenuOpen, onSearchOpen }: HeaderProps) {
           <Link href="/shop?tag=sale" className="text-rose-gold hover:text-rose-gold-light transition-colors">Sale</Link>
         </nav>
 
-        {/* Right: Currency + Dark Mode + Cart */}
+        {/* Right: Dark Mode + Cart */}
         <div className="flex items-center gap-0 sm:gap-1">
-          {/* Currency Selector */}
-          <div className="relative hidden sm:block">
-            <button
-              onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
-              className="touch-target text-xs tracking-wider flex items-center gap-1 text-muted hover:text-charcoal transition-colors px-2"
-            >
-              {currency} <ChevronDown size={12} />
-            </button>
-            <AnimatePresence>
-              {showCurrencyDropdown && (
-                <motion.div
-                  initial={{ opacity: 0, y: -4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  className="absolute right-0 top-full mt-1 bg-cream border border-champagne rounded-lg shadow-lg py-1 min-w-[80px] z-50"
-                >
-                  {currencies.map(c => (
-                    <button
-                      key={c}
-                      onClick={() => { setCurrency(c); setShowCurrencyDropdown(false); }}
-                      className={`block w-full text-left px-4 py-2 text-xs tracking-wider hover:bg-pearl transition-colors ${
-                        c === currency ? 'text-rose-gold font-medium' : 'text-charcoal'
-                      }`}
-                    >
-                      {c}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
           {/* Dark Mode Toggle */}
           <button
             onClick={toggleTheme}
