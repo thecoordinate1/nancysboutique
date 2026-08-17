@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Heart, ShoppingBag, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
+import { Heart, ShoppingBag, ShieldCheck, Truck, RotateCcw, Clock } from 'lucide-react';
 import { getProduct, products } from '@/data/products';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
@@ -92,7 +92,7 @@ export default function ProductPage() {
           <p className="text-[11px] uppercase tracking-[0.2em] text-muted mb-1">{product.subtitle}</p>
           <h1 className="font-serif text-2xl lg:text-3xl tracking-wide mb-2">{product.name}</h1>
 
-          <div className="flex items-center gap-3 mb-5">
+          <div className="flex items-center gap-3 mb-4">
             <span className="text-xl font-semibold">{formatPrice(product.price)}</span>
             {product.originalPrice && (
               <>
@@ -102,6 +102,19 @@ export default function ProductPage() {
                 </span>
               </>
             )}
+          </div>
+
+          {/* Trust & Urgency Badges */}
+          <div className="flex flex-wrap items-center gap-2 mb-5 text-[11px] tracking-wide">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-gold/10 text-rose-gold font-medium">
+              🔥 Only 3 left in stock
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pearl border border-champagne/40 text-muted">
+              👀 14 people viewing this
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pearl border border-champagne/40 text-muted">
+              <Clock size={12} className="text-amber-500" /> Order in <strong>3h 24m</strong> for Express Delivery
+            </span>
           </div>
 
           <p className="text-sm text-muted leading-relaxed tracking-wide mb-6">{product.description}</p>

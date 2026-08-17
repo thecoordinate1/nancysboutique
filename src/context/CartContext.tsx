@@ -50,6 +50,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [giftWrap, setGiftWrap] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const saved = localStorage.getItem('nancy-cart');
@@ -78,7 +79,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return [...prev, { product, quantity: 1, size, customName, customNumber }];
     });
     setIsOpen(true);
-  }, []);
+    showToast('Added to Bag!', `${product.name} (Size: ${size})`, 'success');
+  }, [showToast]);
 
   const removeItem = useCallback((productId: string, size: string) => {
     setItems(prev => prev.filter(i => !(i.product.id === productId && i.size === size)));
@@ -109,11 +111,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const discount = PROMO_CODES[promoCode.toUpperCase()];
     if (discount) {
       setPromoDiscount(discount);
+      showToast('Promo Code Applied!', `${promoCode.toUpperCase()} (${discount * 100}% OFF)`, 'success');
       return true;
     }
     setPromoDiscount(0);
+    showToast('Invalid Promo Code', 'Try NANCY10 for 10% off', 'error');
     return false;
-  }, [promoCode]);
+  }, [promoCode, showToast]);
 
   const toggleGiftWrap = useCallback(() => setGiftWrap(prev => !prev), []);
 

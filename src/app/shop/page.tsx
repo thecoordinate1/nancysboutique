@@ -12,6 +12,8 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 
+import FilterDrawer from '@/components/shop/FilterDrawer';
+
 type SortOption = 'newest' | 'price-low' | 'price-high' | 'popular';
 
 function ShopContent() {
@@ -22,8 +24,21 @@ function ShopContent() {
   const [category, setCategory] = useState(initialCategory);
   const [sort, setSort] = useState<SortOption>('newest');
   const [showSort, setShowSort] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  // Filter Drawer States
+  const [selectedSize, setSelectedSize] = useState('All');
+  const [maxPrice, setMaxPrice] = useState(500);
+  const [selectedBadge, setSelectedBadge] = useState('all');
+
   const { addItem } = useCart();
   const { toggleItem, isInWishlist } = useWishlist();
+
+  const resetFilters = () => {
+    setSelectedSize('All');
+    setMaxPrice(500);
+    setSelectedBadge('all');
+  };
 
   const filteredProducts = useMemo(() => {
     let filtered: Product[] = [];
@@ -43,13 +58,26 @@ function ShopContent() {
       );
     }
 
+    // Apply Price Filter
+    filtered = filtered.filter(p => p.price <= maxPrice);
+
+    // Apply Size Filter
+    if (selectedSize !== 'All') {
+      filtered = filtered.filter(p => p.sizes.includes(selectedSize));
+    }
+
+    // Apply Badge Tag Filter
+    if (selectedBadge !== 'all') {
+      filtered = filtered.filter(p => p.badge === selectedBadge);
+    }
+
     switch (sort) {
       case 'price-low': return filtered.sort((a, b) => a.price - b.price);
       case 'price-high': return filtered.sort((a, b) => b.price - a.price);
       case 'popular': return filtered.sort((a, b) => (b.badge === 'bestseller' ? 1 : 0) - (a.badge === 'bestseller' ? 1 : 0));
       default: return filtered.sort((a, b) => (b.badge === 'new' ? 1 : 0) - (a.badge === 'new' ? 1 : 0));
     }
-  }, [category, sort, initialCollection]);
+  }, [category, sort, initialCollection, maxPrice, selectedSize, selectedBadge]);
 
   const sortOptions: { value: SortOption; label: string }[] = [
     { value: 'newest', label: 'Newest' },
@@ -84,9 +112,15 @@ function ShopContent() {
 
       {/* Sort & Filter Bar */}
       <div className="flex items-center justify-between px-4 lg:px-8 py-3 border-y border-champagne/30">
-        <button className="flex items-center gap-2 text-xs tracking-wider text-muted hover:text-charcoal transition-colors">
+        <button
+          onClick={() => setIsFilterOpen(true)}
+          className="flex items-center gap-2 text-xs tracking-wider text-muted hover:text-charcoal transition-colors relative"
+        >
           <SlidersHorizontal size={14} />
           Filters
+          {(selectedSize !== 'All' || maxPrice < 500 || selectedBadge !== 'all') && (
+            <span className="w-2 h-2 rounded-full bg-rose-gold" />
+          )}
         </button>
         <div className="relative">
           <button
@@ -190,13 +224,26 @@ function ShopContent() {
           <p className="font-serif text-xl mb-2">No products found</p>
           <p className="text-sm text-muted tracking-wide">Try adjusting your filters or browse all products.</p>
           <button
-            onClick={() => setCategory('all')}
+            onClick={() => { setCategory('all'); resetFilters(); }}
             className="mt-4 px-6 py-2.5 rounded-full bg-charcoal text-cream text-sm tracking-wider"
           >
-            View All
+            Reset All Filters
           </button>
         </div>
       )}
+
+      <FilterDrawer
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        selectedSize={selectedSize}
+        onSelectSize={setSelectedSize}
+        maxPrice={maxPrice}
+        onMaxPriceChange={setMaxPrice}
+        selectedBadge={selectedBadge}
+        onSelectBadge={setSelectedBadge}
+        onReset={resetFilters}
+        totalResults={filteredProducts.length}
+      />
     </div>
   );
 }

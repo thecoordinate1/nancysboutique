@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Product, getProduct } from '@/data/products';
 
+import { useToast } from '@/context/ToastContext';
+
 interface WishlistContextType {
   items: string[];
   addItem: (productId: string) => void;
@@ -23,6 +25,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const saved = localStorage.getItem('nancy-wishlist');
@@ -40,19 +43,27 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = useCallback((productId: string) => {
     setItems(prev => prev.includes(productId) ? prev : [...prev, productId]);
-  }, []);
+    const prod = getProduct(productId);
+    if (prod) showToast('Saved to Wishlist', prod.name, 'success');
+  }, [showToast]);
 
   const removeItem = useCallback((productId: string) => {
     setItems(prev => prev.filter(id => id !== productId));
   }, []);
 
   const toggleItem = useCallback((productId: string) => {
-    setItems(prev =>
-      prev.includes(productId)
-        ? prev.filter(id => id !== productId)
-        : [...prev, productId]
-    );
-  }, []);
+    setItems(prev => {
+      const exists = prev.includes(productId);
+      const prod = getProduct(productId);
+      if (exists) {
+        if (prod) showToast('Removed from Wishlist', prod.name, 'info');
+        return prev.filter(id => id !== productId);
+      } else {
+        if (prod) showToast('Saved to Wishlist', prod.name, 'success');
+        return [...prev, productId];
+      }
+    });
+  }, [showToast]);
 
   const isInWishlist = useCallback((productId: string) => items.includes(productId), [items]);
 
